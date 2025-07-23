@@ -12,10 +12,14 @@ CORS(app)
 
 FLASK_APP_KEY = os.getenv("FLASK_APP_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
+
+print(f"FLASK_APP_KEY: {FLASK_APP_KEY[:20] if FLASK_APP_KEY else 'None'}...")
+print(f"MONGO_URI: {MONGO_URI[:50] if MONGO_URI else 'None'}...")
+
 if not FLASK_APP_KEY or not MONGO_URI:
     raise ValueError("Missing FLASK_APP_KEY or MONGO_URI in environment.")
 
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URI, tlsAllowInvalidCertificates=True)
 db = client["Test-Org"]
 users = db.users
 students = db.students
