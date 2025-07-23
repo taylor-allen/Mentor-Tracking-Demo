@@ -11,14 +11,13 @@ export const Login = () => {
     email: "",
     password: "",
   });
+
   const [showMessage, setShowMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Check for success message when component mounts
   useEffect(() => {
     if (store.message && store.message.includes("Sign up successful")) {
       setShowMessage(true);
-      // Clear the message after 5 seconds
       setTimeout(() => {
         setShowMessage(false);
         dispatch({ type: "SET_MESSAGE", payload: "" });
@@ -28,9 +27,7 @@ export const Login = () => {
 
   const handleLoginForm = async (e) => {
     e.preventDefault();
-    // Clear any previous error messages
     setErrorMessage("");
-
     if (!formData.email || !formData.password) {
       setErrorMessage("Please fill in both fields.");
       return;
@@ -73,7 +70,7 @@ export const Login = () => {
               value={formData.email}
               onChange={(e) => {
                 setFormData({ ...formData, email: e.target.value });
-                if (errorMessage) setErrorMessage(""); // Clear error when user starts typing
+                if (errorMessage) setErrorMessage("");
               }}
             />
           </div>
@@ -88,19 +85,18 @@ export const Login = () => {
               value={formData.password}
               onChange={(e) => {
                 setFormData({ ...formData, password: e.target.value });
-                if (errorMessage) setErrorMessage(""); // Clear error when user starts typing
+                if (errorMessage) setErrorMessage(""); 
               }}
             />
           </div>
           <div>
-            {/* Success message display */}
+            {/* success & error messages */}
             {showMessage && (
               <div className="w-75 my-4 p-3 text-green-700 rounded text-center">
                 {store.message}
               </div>
             )}
 
-            {/* Error message display */}
             {errorMessage && (
               <div className="w-75 my-4 p-3 text-red-700 rounded text-center text-center ">
                 {errorMessage}

@@ -13,15 +13,16 @@ export const SignUp = () => {
     password: "",
   });
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleSignUpForm = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.password) {
-      alert("Please fill in all fields.");
+      setErrorMessage("Please fill in all fields.");
       return;
     }
     const data = await handleSignUp(formData);
     if (data.status === "success") {
-      // Set success message in global state
       dispatch({
         type: "SET_MESSAGE",
         payload: "Sign up successful. Please log in.",
@@ -29,10 +30,10 @@ export const SignUp = () => {
       setFormData({ name: "", email: "", password: "" });
       navigate("/login");
     } else {
-      alert("Sign up failed: " + data.message);
-      return;
+      setErrorMessage("Sign up failed: " + data.message);
     }
   };
+
   return (
     <>
       <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
@@ -43,7 +44,7 @@ export const SignUp = () => {
           onSubmit={handleSignUpForm}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              e.preventDefault(); // Prevent form submission on Enter key
+              e.preventDefault(); 
               handleSignUpForm(e);
             }
           }}
@@ -57,9 +58,10 @@ export const SignUp = () => {
               type="text"
               className="w-full p-2 border border-gray-300 rounded"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, name: e.target.value });
+                if (errorMessage) setErrorMessage("");
+              }}
             />
           </div>
           <div className="mb-4">
@@ -71,9 +73,10 @@ export const SignUp = () => {
               type="email"
               className="w-full p-2 border border-gray-300 rounded"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, email: e.target.value });
+                if (errorMessage) setErrorMessage("");
+              }}
             />
           </div>
           <div className="mb-4">
@@ -85,10 +88,20 @@ export const SignUp = () => {
               type="password"
               className="w-full p-2 border border-gray-300 rounded"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={(e) => {
+                setFormData({ ...formData, password: e.target.value });
+                if (errorMessage) setErrorMessage("");
+              }}
             />
+          </div>
+          <div>
+            {/* error message */}
+
+            {errorMessage && (
+              <div className="w-75 my-4 p-3 text-red-700 rounded text-center text-center ">
+                {errorMessage}
+              </div>
+            )}
           </div>
           <button
             type="submit"
