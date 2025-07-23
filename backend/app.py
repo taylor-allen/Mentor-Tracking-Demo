@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId
-import os, jwt, datetime, uuid, ssl
+import os, jwt, datetime, uuid, ssl, sys
 
 load_dotenv()
 app = Flask(__name__)
@@ -64,6 +64,19 @@ except Exception as e:
 @app.route("/")
 def home():
     return "Flask backend is running!"
+
+
+@app.route("/debug")
+def debug():
+    return jsonify({
+        "mongo_uri_exists": bool(os.getenv("MONGO_URI")),
+        "flask_key_exists": bool(os.getenv("FLASK_APP_KEY")),
+        "mongo_uri_preview": os.getenv("MONGO_URI", "Not set")[:50] + "..." if os.getenv("MONGO_URI") else "Not set",
+        "users_collection": users is not None,
+        "db_connection": db is not None,
+        "client_connection": client is not None,
+        "python_version": "3.11" if "3.11" in str(sys.version) else str(sys.version)[:20]
+    })
 
 
 def get_user_from_token():
