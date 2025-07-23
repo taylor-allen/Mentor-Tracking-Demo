@@ -24,25 +24,13 @@ try:
     print(f"Connecting to MongoDB with URI: {MONGO_URI}")
     print(f"FLASK_APP_KEY exists: {'FLASK_APP_KEY' in os.environ}")
 
-    # For MongoDB Atlas, use the simplified connection
-    if "mongodb+srv://" in MONGO_URI:
-        # For MongoDB Atlas (srv connection) - PyMongo 4.x syntax
-        client = MongoClient(
-            MONGO_URI,
-            serverSelectionTimeoutMS=30000,
-            connectTimeoutMS=30000,
-            socketTimeoutMS=30000,
-            tls=True,
-            tlsAllowInvalidCertificates=True,
-        )
-    else:
-        # For regular MongoDB connections
-        client = MongoClient(
-            MONGO_URI,
-            serverSelectionTimeoutMS=30000,
-            connectTimeoutMS=30000,
-            socketTimeoutMS=30000,
-        )
+    # Simple MongoDB Atlas connection - let PyMongo handle SSL automatically
+    client = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=30000,
+        connectTimeoutMS=30000,
+        socketTimeoutMS=30000,
+    )
 
     # Test the connection
     client.admin.command("ping")
@@ -68,15 +56,23 @@ def home():
 
 @app.route("/debug")
 def debug():
-    return jsonify({
-        "mongo_uri_exists": bool(os.getenv("MONGO_URI")),
-        "flask_key_exists": bool(os.getenv("FLASK_APP_KEY")),
-        "mongo_uri_preview": os.getenv("MONGO_URI", "Not set")[:50] + "..." if os.getenv("MONGO_URI") else "Not set",
-        "users_collection": users is not None,
-        "db_connection": db is not None,
-        "client_connection": client is not None,
-        "python_version": "3.11" if "3.11" in str(sys.version) else str(sys.version)[:20]
-    })
+    return jsonify(
+        {
+            "mongo_uri_exists": bool(os.getenv("MONGO_URI")),
+            "flask_key_exists": bool(os.getenv("FLASK_APP_KEY")),
+            "mongo_uri_preview": (
+                os.getenv("MONGO_URI", "Not set")[:50] + "..."
+                if os.getenv("MONGO_URI")
+                else "Not set"
+            ),
+            "users_collection": users is not None,
+            "db_connection": db is not None,
+            "client_connection": client is not None,
+            "python_version": (
+                "3.11" if "3.11" in str(sys.version) else str(sys.version)[:20]
+            ),
+        }
+    )
 
 
 def get_user_from_token():
