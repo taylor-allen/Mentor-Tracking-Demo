@@ -8,7 +8,12 @@ import os, jwt, datetime, uuid
 
 load_dotenv()
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    origins="*",
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+)
 
 FLASK_APP_KEY = os.getenv("FLASK_APP_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
