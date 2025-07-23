@@ -23,7 +23,7 @@ if not FLASK_APP_KEY or not MONGO_URI:
 try:
     print(f"Connecting to MongoDB with URI: {MONGO_URI}")
     print(f"FLASK_APP_KEY exists: {'FLASK_APP_KEY' in os.environ}")
-    
+
     # For MongoDB Atlas, use the connection string with proper SSL handling
     if "mongodb+srv://" in MONGO_URI:
         # For MongoDB Atlas (srv connection), disable SSL verification
@@ -34,7 +34,7 @@ try:
             socketTimeoutMS=30000,
             ssl=True,
             ssl_cert_reqs=ssl.CERT_NONE,
-            ssl_match_hostname=False
+            ssl_match_hostname=False,
         )
     else:
         # For regular MongoDB connections
@@ -42,11 +42,11 @@ try:
             MONGO_URI,
             serverSelectionTimeoutMS=30000,
             connectTimeoutMS=30000,
-            socketTimeoutMS=30000
+            socketTimeoutMS=30000,
         )
-    
+
     # Test the connection
-    client.admin.command('ping')
+    client.admin.command("ping")
     print("MongoDB connection successful!")
     db = client["Test-Org"]
     users = db.users
@@ -419,4 +419,5 @@ def delete_user(user_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
