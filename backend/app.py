@@ -16,7 +16,7 @@ if not FLASK_APP_KEY or not MONGO_URI:
     raise ValueError("Missing FLASK_APP_KEY or MONGO_URI in environment.")
 
 client = MongoClient(MONGO_URI)
-db = client["4Geeks"]
+db = client["Test-Org"]
 users = db.users
 students = db.students
 sessions = db.sessions
@@ -67,7 +67,15 @@ def login():
     if not user or not check_password_hash(user["password"], data.get("password")):
         return jsonify(status="error", message="Invalid email or password"), 401
     if not user["is_authorized"]:
-        return jsonify(status="error", message="User is not yet authorized"), 403
+        return (
+            jsonify(
+                status="error",
+                message="User is not yet authorized."
+                "\n"
+                "Please contact your system admin.",
+            ),
+            403,
+        )
     payload = {
         "email": user["email"],
         "name": user["name"],

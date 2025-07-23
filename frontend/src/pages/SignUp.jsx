@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useActions } from "../../hooks/useActions";
 import { Link, useNavigate } from "react-router-dom";
+import useGlobalReducer from "../../hooks/useGlobalReducer";
 
 export const SignUp = () => {
   const { handleSignUp } = useActions();
+  const { dispatch } = useGlobalReducer();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -19,13 +21,17 @@ export const SignUp = () => {
     }
     const data = await handleSignUp(formData);
     if (data.status === "success") {
-      alert("Sign up successful!");
+      // Set success message in global state
+      dispatch({
+        type: "SET_MESSAGE",
+        payload: "Sign up successful. Please log in.",
+      });
+      setFormData({ name: "", email: "", password: "" });
+      navigate("/login");
     } else {
       alert("Sign up failed: " + data.message);
       return;
     }
-    setFormData({ name: "", email: "", password: "" });
-    navigate("/login");
   };
   return (
     <>
