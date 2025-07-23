@@ -278,35 +278,57 @@ export function StudentList({ onRefresh }) {
 
   if (students.length === 0) {
     return (
-      <div className="text-center py-8">
-        <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+      <div>
+        <div className="text-center py-8">
+          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
 
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          No students yet
-        </h3>
-        <p className="text-gray-500">
-          Start by adding your first student to track mentoring sessions.
-        </p>
-        <Button
-          className="bg-blue-600 hover:bg-blue-700 flex items-center mt-4"
-          onClick={() => setShowAddStudent(true)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6 mr-1"
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No students yet
+          </h3>
+          <p className="text-gray-500">
+            Start by adding your first student to track mentoring sessions.
+          </p>
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 flex items-center mt-4"
+            onClick={() => setShowAddStudent(true)}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="size-6 mr-1"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+            Add Student
+          </Button>
+          {showAddStudent && (
+            <AddStudentForm
+              onSuccess={() => {
+                setShowAddStudent(false);
+                if (onRefresh) onRefresh();
+              }}
+              onCancel={() => setShowAddStudent(false)}
             />
-          </svg>
-          Add Student
-        </Button>
+          )}
+        </div>
+        <div>
+          {showAddStudent && (
+            <AddStudentForm
+              onSuccess={() => {
+                setShowAddStudent(false);
+                if (onRefresh) onRefresh();
+              }}
+              onCancel={() => setShowAddStudent(false)}
+            />
+          )}
+        </div>
       </div>
     );
   }
