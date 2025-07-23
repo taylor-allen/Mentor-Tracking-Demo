@@ -20,9 +20,20 @@ if not FLASK_APP_KEY or not MONGO_URI:
     raise ValueError("Missing FLASK_APP_KEY or MONGO_URI in environment.")
 
 # MongoDB connection with debugging and SSL configuration
+client = None
+db = None
+users = None
+students = None
+sessions = None
+
 try:
     print(f"Connecting to MongoDB with URI: {MONGO_URI}")
     print(f"FLASK_APP_KEY exists: {'FLASK_APP_KEY' in os.environ}")
+    print(f"Python version: {sys.version}")
+
+    import pymongo
+
+    print(f"PyMongo version: {pymongo.version}")
 
     # Simple MongoDB Atlas connection - let PyMongo handle SSL automatically
     client = MongoClient(
@@ -33,16 +44,30 @@ try:
     )
 
     # Test the connection
-    client.admin.command("ping")
+    print("Testing MongoDB connection...")
+    result = client.admin.command("ping")
+    print(f"MongoDB ping result: {result}")
     print("MongoDB connection successful!")
+
     db = client["Test-Org"]
     users = db.users
     students = db.students
     sessions = db.sessions
+
+    print(f"Database objects initialized - db: {db}, users: {users}")
+
 except Exception as e:
     print(f"MongoDB connection error: {e}")
+    print(f"Error type: {type(e).__name__}")
+    import traceback
+
+    print(f"Full traceback: {traceback.format_exc()}")
     # Use a fallback for development
     client = None
+    db = None
+    users = None
+    students = None
+    sessions = None
     db = None
     users = None
     students = None
@@ -56,23 +81,45 @@ def home():
 
 @app.route("/debug")
 def debug():
-    return jsonify(
-        {
-            "mongo_uri_exists": bool(os.getenv("MONGO_URI")),
-            "flask_key_exists": bool(os.getenv("FLASK_APP_KEY")),
-            "mongo_uri_preview": (
-                os.getenv("MONGO_URI", "Not set")[:50] + "..."
-                if os.getenv("MONGO_URI")
-                else "Not set"
-            ),
-            "users_collection": users is not None,
-            "db_connection": db is not None,
-            "client_connection": client is not None,
-            "python_version": (
-                "3.11" if "3.11" in str(sys.version) else str(sys.version)[:20]
-            ),
-        }
-    )
+    debug_info = {
+        "mongo_uri_exists": bool(os.getenv("MONGO_URI")),
+        "flask_key_exists": bool(os.getenv("FLASK_APP_KEY")),
+        "mongo_uri_preview": (
+            os.getenv("MONGO_URI", "Not set")[:50] + "..."
+            if os.getenv("MONGO_URI")
+            else "Not set"
+        ),
+        "users_collection": users is not None,
+        "db_connection": db is not None,
+        "client_connection": client is not None,
+        "python_version": (
+            "3.11" if "3.11" in str(sys.version) else str(sys.version)[:20]
+        ),
+    }
+
+    # Try to get PyMongo version
+    try:
+        import pymongo
+
+        debug_info["pymongo_version"] = pymongo.version
+    except Exception as e:
+        debug_info["pymongo_version"] = f"Error: {e}"
+
+    # Test MongoDB connection if client exists
+    if client:
+        try:
+            ping_result = client.admin.command("ping")
+            debug_info["mongodb_ping"] = "success"
+            debug_info["ping_result"] = ping_result
+
+            # Test database access
+            if db:
+                collections = db.list_collection_names()
+                debug_info["collections"] = collections
+        except Exception as e:
+            debug_info["mongodb_ping"] = f"failed: {e}"
+
+    return jsonify(debug_info)
 
 
 def get_user_from_token():
