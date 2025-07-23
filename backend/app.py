@@ -23,15 +23,28 @@ if not FLASK_APP_KEY or not MONGO_URI:
 try:
     print(f"Connecting to MongoDB with URI: {MONGO_URI}")
     print(f"FLASK_APP_KEY exists: {'FLASK_APP_KEY' in os.environ}")
-    client = MongoClient(
-        MONGO_URI,
-        serverSelectionTimeoutMS=30000,
-        connectTimeoutMS=30000,
-        socketTimeoutMS=30000,
-        tls=True,
-        tlsAllowInvalidCertificates=True,
-        ssl_cert_reqs=ssl.CERT_NONE
-    )
+    
+    # For MongoDB Atlas, use the connection string with proper SSL handling
+    if "mongodb+srv://" in MONGO_URI:
+        # For MongoDB Atlas (srv connection), disable SSL verification
+        client = MongoClient(
+            MONGO_URI,
+            serverSelectionTimeoutMS=30000,
+            connectTimeoutMS=30000,
+            socketTimeoutMS=30000,
+            ssl=True,
+            ssl_cert_reqs=ssl.CERT_NONE,
+            ssl_match_hostname=False
+        )
+    else:
+        # For regular MongoDB connections
+        client = MongoClient(
+            MONGO_URI,
+            serverSelectionTimeoutMS=30000,
+            connectTimeoutMS=30000,
+            socketTimeoutMS=30000
+        )
+    
     # Test the connection
     client.admin.command('ping')
     print("MongoDB connection successful!")
