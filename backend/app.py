@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId
-import os, jwt, datetime, uuid
+import os, jwt, datetime, uuid, ssl
 
 load_dotenv()
 app = Flask(__name__)
@@ -19,11 +19,34 @@ print(f"MONGO_URI: {MONGO_URI[:50] if MONGO_URI else 'None'}...")
 if not FLASK_APP_KEY or not MONGO_URI:
     raise ValueError("Missing FLASK_APP_KEY or MONGO_URI in environment.")
 
-client = MongoClient(MONGO_URI, tlsAllowInvalidCertificates=True)
-db = client["Test-Org"]
-users = db.users
-students = db.students
-sessions = db.sessions
+# MongoDB connection with debugging and SSL configuration
+try:
+    print(f"Connecting to MongoDB with URI: {MONGO_URI}")
+    print(f"FLASK_APP_KEY exists: {'FLASK_APP_KEY' in os.environ}")
+    client = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=30000,
+        connectTimeoutMS=30000,
+        socketTimeoutMS=30000,
+        tls=True,
+        tlsAllowInvalidCertificates=True,
+        ssl_cert_reqs=ssl.CERT_NONE
+    )
+    # Test the connection
+    client.admin.command('ping')
+    print("MongoDB connection successful!")
+    db = client["Test-Org"]
+    users = db.users
+    students = db.students
+    sessions = db.sessions
+except Exception as e:
+    print(f"MongoDB connection error: {e}")
+    # Use a fallback for development
+    client = None
+    db = None
+    users = None
+    students = None
+    sessions = None
 
 
 @app.route("/")
@@ -49,6 +72,8 @@ def get_user_from_token():
 
 @app.route("/api/signup", methods=["POST"])
 def signup():
+    if users is None:
+        return jsonify(status="error", message="Database connection error"), 500
     data = request.get_json()
     if not all(data.get(k) for k in ("email", "password", "name")):
         return jsonify(status="error", message="Missing required fields"), 400
@@ -67,6 +92,8 @@ def signup():
 
 @app.route("/api/login", methods=["POST"])
 def login():
+    if users is None:
+        return jsonify(status="error", message="Database connection error"), 500
     data = request.get_json()
     user = users.find_one({"email": data.get("email")})
     if not user or not check_password_hash(user["password"], data.get("password")):
