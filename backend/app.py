@@ -24,17 +24,16 @@ try:
     print(f"Connecting to MongoDB with URI: {MONGO_URI}")
     print(f"FLASK_APP_KEY exists: {'FLASK_APP_KEY' in os.environ}")
 
-    # For MongoDB Atlas, use the connection string with proper SSL handling
+    # For MongoDB Atlas, use the simplified connection
     if "mongodb+srv://" in MONGO_URI:
-        # For MongoDB Atlas (srv connection), disable SSL verification
+        # For MongoDB Atlas (srv connection) - PyMongo 4.x syntax
         client = MongoClient(
             MONGO_URI,
             serverSelectionTimeoutMS=30000,
             connectTimeoutMS=30000,
             socketTimeoutMS=30000,
-            ssl=True,
-            ssl_cert_reqs=ssl.CERT_NONE,
-            ssl_match_hostname=False,
+            tls=True,
+            tlsAllowInvalidCertificates=True,
         )
     else:
         # For regular MongoDB connections
