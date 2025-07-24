@@ -85,9 +85,15 @@ export const Login = () => {
               value={formData.password}
               onChange={(e) => {
                 setFormData({ ...formData, password: e.target.value });
-                if (errorMessage) setErrorMessage(""); 
+                if (errorMessage) setErrorMessage("");
               }}
             />
+          </div>
+          <div className="mb-4 text-center">
+            <blockquote>Basic Demo User: test@demo.com</blockquote>
+            <blockquote>Password: testpass</blockquote>
+            <blockquote>Admin Demo User: admintest@demo.com</blockquote>
+            <blockquote>Password: testpass</blockquote>
           </div>
           <div>
             {/* success & error messages */}
